@@ -1,14 +1,39 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import { Card, Space } from 'antd';
+import { Card, Pagination } from 'antd';
+import { useFetch } from '../use/useFetch'
+import { useState } from 'react';
+
+import type { PaginationProps } from 'antd';
+
+const getDescription = (data: any[]) => {
+
+}
 
 
 
-
-const 
 
 export default function Home() {
+
+  const url = 'https://api.escuelajs.co/api/v1/products';
+  const { data, loading, error } = useFetch(url);
+
+  const { Meta } = Card;
+
+  const [current, setCurrent] = useState(1);
+
+  const onChange: PaginationProps['onChange'] = (page) => {
+    setCurrent(page);
+  };
+
+  const filterproduct = (data: any[]) => {
+    if (current == 1) {
+      return data.slice(current - 1, current + 19)
+    } else {
+      return data.slice((current * 20) - 20, current * 20)
+    }
+  }
+
   return (
     <>
       <Head>
@@ -17,9 +42,27 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main >
-        {}
-      </main>
+      <section>
+        <h1>Nuestros productos</h1>
+        <div className='container'>
+          {filterproduct(data).map(data => (
+            <div key={data.id} className="product">
+              <Card
+                hoverable
+                style={{ width: 200 }}
+                cover={<img alt={data.title} src={data.images} />}
+              >
+                <Meta title={data.title} description={data.price} />
+              </Card>
+              <button type='button' onClick={() => getDescription(data)}>More Info</button>
+            </div>
+          ))}
+        </div>
+        <div className='pagination'>
+          <Pagination current={current} onChange={onChange} total={data.length} pageSize={20} pageSizeOptions={[20]} />
+        </div>
+      </section>
     </>
   )
 }
+
